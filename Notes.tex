@@ -1,0 +1,150 @@
+\documentclass[openany, a4, 12pt]{article}
+
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphics}
+
+%\setlength\parindent{0pt}
+
+\title{Quantum Cryptography and Quantum Key Distribution Notes}
+\author{Gergely Lendvay}
+\date{\today}
+
+\begin{document}
+\maketitle\clearpage
+
+\tableofcontents\clearpage
+
+\section*{List of Acronyms}
+\begin{tabbing}
+\hspace{3cm} \= \kill
+    AES \dotfill \> Advanced Encryption Standard \\
+    RSA \dotfill \> Rivest--Shamir--Adleman \\
+    PQC \dotfill \> Post-Quantum Cryptography \\
+    QKD \dotfill \> Quantum Key Distribution
+\end{tabbing}
+
+\newpage\section*{Introduction}
+\subsection{Course Info}
+\subsubsection{Teachers}
+\noindent Konstantin Wernli -- kwernli@imada.sdu.dk
+
+\noindent William Mistegard -- wem@imada.sdu.dk
+
+\noindent Jurek Bleischwitz -- jurek@imada.sdu.dk
+
+\subsubsection{Exercise Classes}
+\begin{enumerate}
+    \item Solutions must be uploaded before each class.
+    \item Exercise sheets are discussed during the classes.
+    \item The four best exercise solutions count towards the overall course grade.
+\end{enumerate}
+
+\subsubsection{Exam}
+\begin{enumerate}
+    \item Assessment is based on four graded exercise sheets, and
+    \item Final oral exam consisting of:
+    \begin{itemize}
+        \item 10--12 minutes presentation,
+        \item 13--15 minutes discussion and questions,
+        \item 5 possible topics, with 30 minutes of preparation time.
+    \end{itemize}
+    \item Tentative exam date: June 9, 2026
+\end{enumerate}
+
+\subsubsection{Books}
+Quantum Key Distribution -- Ramona Wolf
+
+\subsection{Plan}
+The course begins with an introduction to classical cryptography and quantum key distribution (QKD), followed by a recap of quantum computing and quantum information theory.
+Subsequent topics include post-processing, security analysis, practical implementations of QKD, and post-quantum cryptography.
+
+\newpage\section{First Lecture}
+\subsection{Classical Cryptography}
+The fundamental problem of cryptography is to enable secure communication between two parties, traditionally called Alice and Bob, while preventing an adversary Eve from gaining any information about the transmitted message.
+
+Classical cryptography includes examples, such as the Caesar cipher, while more modern schemes can be categorized either to symmetric or asymmetric schemes. Well-known examples include Advanced Encryption Standard (AES) and Rivest--Shamir--Adleman (RSA).
+
+\begin{table}[h!]
+    \centering
+    \resizebox{\textwidth}{!}{
+        \begin{tabular}{|c|*{26}{c}|}
+            \hline
+            \textbf{Plain Alphabet} & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P & Q & R & S & T & U & V & W & X & Y & Z \\
+            \hline
+            \textbf{Cipher Alphabet} & D & E & F & G & H & I & J & K & L & M & N & O & P & Q & R & S & T & U & V & W & X & Y & Z & A & B & C \\
+            \hline
+        \end{tabular}
+    }
+    \caption{Caesar Cipher Table (Right Shift by 3)}
+    \label{table:caesar}
+\end{table}
+
+\paragraph{Impact of Quantum Computing on Classical Cryptography}
+One of the major implications of quantum computing is its ability to efficiently solve certain mathematical problems that are believed to be hard for classical computers.
+In particular, efficient prime factorization through Shor's algorithm would render widely used public-key cryptographic schemes such as RSA insecure.
+
+\subsection{RSA Encryption Scheme}
+The RSA algorithm was introduced in 1977 by Rivest, Shamir, and Adleman and is still widely used, making up approximately 50\% of all asymmetric encryption schemes.
+The goal is to find 3 integers $n$, $e$, and $d$ such that for all messages
+\[x\in \{0,\dots,n-1\},\]
+the following holds:
+\[(x^e)^d \equiv x\pmod{n}.\]
+
+\paragraph{Key Generation}
+Two large random prime numbers $p$ and $q$ are chosen, typically satisfying
+\[2^{1023} < p,q < 2^{1024}.\]
+The public modulus is defined as
+\[n = pq.\]
+Let $\lambda(n)$ denote Carmichael's function,
+\[\lambda(n) = \mathrm{km}(p-1,q-1).\]
+An integer $e$ is chosen such that
+\[1<e<\lambda(n), \qquad \gcd(e, \lambda(n)) = 1.\]
+The private key $d$ is defined as the modular inverse of $e$ modulo $\lambda(n)$:
+\[d \equiv e^{-1} \pmod{\lambda(n)}.\]
+
+\paragraph{Encryption and Decryption}
+The public key $(n,e)$ is made available to everyone, while the private key $d$ is kept secret.
+To send a message $x$, Bob computes the ciphertext
+\[y \equiv x^e \pmod{n}\]
+and sends $y$ to Alice.
+Using her private key, Alice decrypts the message by computing
+\[y^d = (x^e)^d \equiv x \pmod{n}.\]
+
+An eavesdropper Even, even knowing $n$, $e$, and the encrypted message $y$, cannot efficiently recover $x$ without access to $d$.
+This is because computing $d$ requires knowledge of $\lambda(n)$, which in turn requires factoring $n$ into $p$ and $q$.
+
+\paragraph{Proof}
+Since $n = pq$,
+\[m^{ed} \equiv m \pmod{p} \quad \text{and} \quad m^{ed} \equiv m \pmod{q}.\]
+Because
+\[ed \equiv 1 \pmod{\lambda(n)},\]
+there exists an integer $k$ such that
+\[ed-1=k(p-1).\]
+Then, for $x \not\equiv 0 \pmod{p}$,
+\[m^{ed-1} = m^{k(p-1)} = (m^{p-1})^k = 1^k \equiv 1 \pmod{p},\]
+by Fermat's Theorem, which states that if $p$ is a prime and $\gcd(m,p)=1$, then
+\[m^{p-1} \equiv 1 \pmod{p}.\]
+The same argument holds for $q$.
+
+\paragraph{Security Assumptions}
+The security of RSA relies on the computational hardness of factoring large integers.
+The best known classical factoring algorithms run in sub-exponential time,
+\[\exp( c (\log n)^{1/3} (\log\log n)^{2/3}),\]
+which is infeasible for sufficiently large $n$.
+
+\paragraph{Quantum Threat}
+Shor's algorithm shows that a quantum computer can factor integers in polynomial time,
+\[O((\log n)^3).\]
+This would completely break RSA if large-scale, fault-tolerant quantum computers become available.
+
+Currently, practical limitations such as qubit count, noise, and error correction prevent Shor's algorithm from being applied.
+In practice, breaking RSA would require millions of qubits.
+
+Even if RSA remains secure in the near term, cryptographic systems must be developed that are resistant to quantum attacks.
+This includes both new classical schemes (post-quantum cryptography) and quantum approaches such as Quantum Key Distribution (QKD).
+
+\newpage\section{Second Lecture}
+
+\end{document}
