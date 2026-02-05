@@ -3,6 +3,7 @@
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{amsthm}
+\usepackage{braket}
 \usepackage{graphics}
 
 %\setlength\parindent{0pt}
@@ -64,7 +65,7 @@ Subsequent topics include post-processing, security analysis, practical implemen
 \subsection{Classical Cryptography}
 The fundamental problem of cryptography is to enable secure communication between two parties, traditionally called Alice and Bob, while preventing an adversary Eve from gaining any information about the transmitted message.
 
-Classical cryptography includes examples, such as the Caesar cipher, while more modern schemes can be categorized either to symmetric or asymmetric schemes. Well-known examples include Advanced Encryption Standard (AES) and Rivest--Shamir--Adleman (RSA).
+Classical cryptography includes examples, such as the Caesar cipher, while more modern schemes can be categorized either by symmetric or asymmetric schemes. Well-known examples include Advanced Encryption Standard (AES) and Rivest--Shamir--Adleman (RSA).
 
 \begin{table}[h!]
     \centering
@@ -112,7 +113,7 @@ and sends $y$ to Alice.
 Using her private key, Alice decrypts the message by computing
 \[y^d = (x^e)^d \equiv x \pmod{n}.\]
 
-An eavesdropper Even, even knowing $n$, $e$, and the encrypted message $y$, cannot efficiently recover $x$ without access to $d$.
+An eavesdropper Eve, even knowing $n$, $e$, and the encrypted message $y$, cannot efficiently recover $x$ without access to $d$.
 This is because computing $d$ requires knowledge of $\lambda(n)$, which in turn requires factoring $n$ into $p$ and $q$.
 
 \paragraph{Proof}
@@ -146,5 +147,70 @@ Even if RSA remains secure in the near term, cryptographic systems must be devel
 This includes both new classical schemes (post-quantum cryptography) and quantum approaches such as Quantum Key Distribution (QKD).
 
 \newpage\section{Second Lecture}
+\subsection{Provably Secure Cryptography}
+Example: RSA is not proven to be secure against a polynomial adversary as it can be broken with an infinitely good computer.
+
+An encryption scheme is secure if we can mathematically prove it.
+
+Example: One-time pad (Vernam cipher, 1926): Alice and Bob share a secret key $S_A=S_B \in \{0,1\}^*$ without Eve knowing.
+Alice encrypts the message $m \in \{0,1\}^* (c)_i = m_i \oplus (S_A)_i$
+\[S_A=101, \qquad m=011, \qquad c=110\]
+
+Alice then sends the encrypted message $c$ to Bob and decrypts it: $m'_i = c_i \oplus (S_B)_i$
+
+\[m'_i = c_i \oplus (S_B)_i = (m_i \oplus (S_A)_i) \oplus (S_B)_i = m_i \oplus ((S_A)_i \oplus (S_B)_i) = m_i \oplus 0 = m_i\]
+
+One can prove that $c$ provides no information about $m$ given that:
+\begin{enumerate}
+    \item Key must be random
+    \item Key is as long as the message
+    \item Key is not re-used
+    \item Key must be completely secret
+\end{enumerate}
+
+mathematical properties of the key:
+Ideally:
+\begin{enumerate}
+    \item Correctness $S_A=S_B$
+    \item Randomness $P[S=S] = 2^{-n}$
+    \item Eve has no information about the key
+\end{enumerate}
+
+More realistically:
+$P[S_A \neq S_B] < \epsilon$
+Close to uniformly random, individual bits are independent
+If Eve interferes with key generation, then we do not produce a key
+
+\subsection{Quantum Key Distribution}
+BB84, Bennett Brassard 1984
+
+Eve can listen to the classical channel, with complete access to the quantum channel
+
+\paragraph{Quantum Transmission}
+Alice chooses two bit-strings at random: $a,b \in \{0,1\}^*$ where $a$ is the key and $b$ is the encoding basis.
+
+Alice prepares qubit states $\ket{\psi_i}$ by encoding $a_i$:
+\begin{enumerate}
+    \item In the computational basis, $\ket{0}$ and $\ket{1}$
+    \item Diagonal basis $\ket{+}$, $\ket{-}$
+\end{enumerate}
+
+Alice sends them across the quantum channel
+
+Bob chooses $b'$ at random and measures $\ket{\psi_i}$ in basis $b_i$: $a'_i$ = measurement of $\ket{\psi_i}$ in basis $b'_i$
+If $b'_i = b_i$ then $a'_i = a_i$ else if $b'_i \neq b_i$ then $a'_i$ is uniformly random and gets discarded
+
+If $b'_i = b_i$: $0 \to \ket{0}, 1 \to \ket{1}$, then in a computational basis state, $P_{\psi}(0) = |\bra{0}\ket{\psi}|^2$ and $P_{\psi}(1) = |\bra{1}\ket{\psi}|^2$
+$P_{\ket{0}}(0) = 1$ and $P_{\ket{0}}(1) = 0$, meaning $a'_i = 0$
+
+if $b'_i \neq b_i$, then $a_i = 0$
+$a_i = 0, b_i = 1 \to \ket{\psi_i} = \ket{+}$
+$P_{\ket{+}}(0) = \frac{1}{2} and P_{\ket{+}}(1) = \frac{1}{2}$
+
+Alice and Bob compare $b$ and $b'$ and discard $a_i$ for all $i$ where $b_i \neq b'_i$, where for the remaining $a_i = a'_i$
+
+No cloning theorem prevents Eve from learning the quantum states Alice send Bob
+
+\section{Third Lecture}
 
 \end{document}
