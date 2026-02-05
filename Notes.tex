@@ -21,9 +21,10 @@
 \begin{tabbing}
 \hspace{3cm} \= \kill
     AES \dotfill \> Advanced Encryption Standard \\
-    RSA \dotfill \> Rivest--Shamir--Adleman \\
+    OTP \dotfill \> One-Time Pad \\
     PQC \dotfill \> Post-Quantum Cryptography \\
-    QKD \dotfill \> Quantum Key Distribution
+    QKD \dotfill \> Quantum Key Distribution \\
+    RSA \dotfill \> Rivest--Shamir--Adleman
 \end{tabbing}
 
 \newpage\section*{Introduction}
@@ -91,19 +92,19 @@ The RSA algorithm was introduced in 1977 by Rivest, Shamir, and Adleman and is s
 The goal is to find 3 integers $n$, $e$, and $d$ such that for all messages
 \[x\in \{0,\dots,n-1\},\]
 the following holds:
-\[(x^e)^d \equiv x\pmod{n}.\]
+\[(x^e)^d \equiv x\pmod{n}\]
 
 \paragraph{Key Generation}
 Two large random prime numbers $p$ and $q$ are chosen, typically satisfying
-\[2^{1023} < p,q < 2^{1024}.\]
+\[2^{1023} < p,q < 2^{1024}\]
 The public modulus is defined as
-\[n = pq.\]
+\[n = pq\]
 Let $\lambda(n)$ denote Carmichael's function,
-\[\lambda(n) = \mathrm{km}(p-1,q-1).\]
+\[\lambda(n) = \mathrm{km}(p-1,q-1)\]
 An integer $e$ is chosen such that
-\[1<e<\lambda(n), \qquad \gcd(e, \lambda(n)) = 1.\]
+\[1<e<\lambda(n), \qquad \gcd(e, \lambda(n)) = 1\]
 The private key $d$ is defined as the modular inverse of $e$ modulo $\lambda(n)$:
-\[d \equiv e^{-1} \pmod{\lambda(n)}.\]
+\[d \equiv e^{-1} \pmod{\lambda(n)}\]
 
 \paragraph{Encryption and Decryption}
 The public key $(n,e)$ is made available to everyone, while the private key $d$ is kept secret.
@@ -111,22 +112,22 @@ To send a message $x$, Bob computes the ciphertext
 \[y \equiv x^e \pmod{n}\]
 and sends $y$ to Alice.
 Using her private key, Alice decrypts the message by computing
-\[y^d = (x^e)^d \equiv x \pmod{n}.\]
+\[y^d = (x^e)^d \equiv x \pmod{n}\]
 
 An eavesdropper Eve, even knowing $n$, $e$, and the encrypted message $y$, cannot efficiently recover $x$ without access to $d$.
 This is because computing $d$ requires knowledge of $\lambda(n)$, which in turn requires factoring $n$ into $p$ and $q$.
 
 \paragraph{Proof}
 Since $n = pq$,
-\[m^{ed} \equiv m \pmod{p} \quad \text{and} \quad m^{ed} \equiv m \pmod{q}.\]
+\[m^{ed} \equiv m \pmod{p} \quad \text{and} \quad m^{ed} \equiv m \pmod{q}\]
 Because
 \[ed \equiv 1 \pmod{\lambda(n)},\]
 there exists an integer $k$ such that
-\[ed-1=k(p-1).\]
+\[ed-1=k(p-1)\]
 Then, for $x \not\equiv 0 \pmod{p}$,
 \[m^{ed-1} = m^{k(p-1)} = (m^{p-1})^k = 1^k \equiv 1 \pmod{p},\]
 by Fermat's Theorem, which states that if $p$ is a prime and $\gcd(m,p)=1$, then
-\[m^{p-1} \equiv 1 \pmod{p}.\]
+\[m^{p-1} \equiv 1 \pmod{p}\]
 The same argument holds for $q$.
 
 \paragraph{Security Assumptions}
@@ -137,7 +138,7 @@ which is infeasible for sufficiently large $n$.
 
 \paragraph{Quantum Threat}
 Shor's algorithm shows that a quantum computer can factor integers in polynomial time,
-\[O((\log n)^3).\]
+\[O((\log n)^3)\]
 This would completely break RSA if large-scale, fault-tolerant quantum computers become available.
 
 Currently, practical limitations such as qubit count, noise, and error correction prevent Shor's algorithm from being applied.
@@ -148,69 +149,135 @@ This includes both new classical schemes (post-quantum cryptography) and quantum
 
 \newpage\section{Second Lecture}
 \subsection{Provably Secure Cryptography}
-Example: RSA is not proven to be secure against a polynomial adversary as it can be broken with an infinitely good computer.
+An encryption scheme is considered secure if its security can be mathematically proven.
 
-An encryption scheme is secure if we can mathematically prove it.
+Classical public-key schemes such as RSA are not proven secure against all efficient (polynomial-time) adversaries.
+Their security relies on unproven computational hardness assumptions, such as the difficulty of factoring large numbers.
 
-Example: One-time pad (Vernam cipher, 1926): Alice and Bob share a secret key $S_A=S_B \in \{0,1\}^*$ without Eve knowing.
-Alice encrypts the message $m \in \{0,1\}^* (c)_i = m_i \oplus (S_A)_i$
-\[S_A=101, \qquad m=011, \qquad c=110\]
+\paragraph{One-Time Pad}
+A fundamental example of provably secure encryption is the One-Time Pad (Vernam cipher, 1926).
 
-Alice then sends the encrypted message $c$ to Bob and decrypts it: $m'_i = c_i \oplus (S_B)_i$
+\noindent Alice and Bob share a secret key
+\[S_A=S_B \in \{0,1\}^n,\]
+unknown to Eve, and encrypt a message $m \in \{0,1\}^n$ using bitwise XOR:
+\[c_i = m_i \oplus (S_A)_i\]
 
-\[m'_i = c_i \oplus (S_B)_i = (m_i \oplus (S_A)_i) \oplus (S_B)_i = m_i \oplus ((S_A)_i \oplus (S_B)_i) = m_i \oplus 0 = m_i\]
+\noindent Example:
+\[S_A=S_B=101, \qquad m=011, \qquad c=110\]
+Bob decrypts the message using his key:
+\[m'_i = c_i \oplus (S_B)_i = (m_i \oplus (S_A)_i) \oplus (S_B)_i = m_i \oplus \big((S_A)_i \oplus (S_B)_i\big)\]
+If $S_A = S_B$, then
+\[m'_i = m_i \oplus 0 = m_i\]
 
-One can prove that $c$ provides no information about $m$ given that:
+\noindent The One-Time Pad (OTP) satisfies
+\[P[M=m \mid C=c] = P[M=m],\]
+meaning that the ciphertext $c$ reveals no information about the message $m$.
+This holds if the following conditions are satisfied:
 \begin{enumerate}
-    \item Key must be random
-    \item Key is as long as the message
-    \item Key is not re-used
-    \item Key must be completely secret
+    \item The key is uniformly random
+    \item The key length equals the message length
+    \item The key is never reused
+    \item The key remains completely secret
 \end{enumerate}
 
-mathematical properties of the key:
-Ideally:
+\noindent Ideally, the shared key satisfies:
 \begin{enumerate}
-    \item Correctness $S_A=S_B$
-    \item Randomness $P[S=S] = 2^{-n}$
-    \item Eve has no information about the key
+    \item \textbf{Correctness:} $S_A=S_B$
+    \item \textbf{Uniform Randomness:} $P[S=S] = 2^{-n}$
+    \item \textbf{Secrecy:} Eve has no information about the keys $S_A$ and $S_B$
 \end{enumerate}
 
-More realistically:
-$P[S_A \neq S_B] < \epsilon$
-Close to uniformly random, individual bits are independent
-If Eve interferes with key generation, then we do not produce a key
+\noindent In practice, small imperfections may occur:
+\[P[S_A \neq S_B] < \varepsilon,\]
+the key is statistically close to uniform, and the protocol aborts if eavesdropping is detected.
 
 \subsection{Quantum Key Distribution}
-BB84, Bennett Brassard 1984
+Quantum Key Distribution enables two parties to generate a shared secret key with information-theoretic security, guaranteed by the laws of quantum mechanics.
+The most well-known protocol is BB84, introduced by Bennett and Brassard in 1984.
 
-Eve can listen to the classical channel, with complete access to the quantum channel
+The adversary Eve may listen to the classical channel and interact with the quantum channel, but cannot violate the principles of quantum mechanics.
 
-\paragraph{Quantum Transmission}
-Alice chooses two bit-strings at random: $a,b \in \{0,1\}^*$ where $a$ is the key and $b$ is the encoding basis.
-
-Alice prepares qubit states $\ket{\psi_i}$ by encoding $a_i$:
+\paragraph{Quantum Transmission Phase}
+Alice selects two random bit strings
+\[a,b \in \{0,1\}^n,\]
+where $a$ is the raw key and $b$ determines the encoding basis.
+Each bit $a_i$ is encoded into a qubit $\ket{\psi_i}$ as follows:
 \begin{enumerate}
-    \item In the computational basis, $\ket{0}$ and $\ket{1}$
-    \item Diagonal basis $\ket{+}$, $\ket{-}$
+    \item Computational basis ($b_i = 0$):
+    \[0 \mapsto \ket{0}, \qquad 1 \mapsto \ket{1}\]
+    \item Diagonal/Hadamard basis ($b_i = 1$):
+    \[0 \mapsto \ket{+} = \frac{1}{\sqrt{2}}(\ket{0}+\ket{1}), \qquad 1 \mapsto \ket{-} = \frac{1}{\sqrt{2}}(\ket{0}-\ket{1})\]
 \end{enumerate}
+Alice sends the qubits to Bob over the quantum channel.
 
-Alice sends them across the quantum channel
+\paragraph{Measurement Phase}
+Bob independently chooses a random basis string
+\[b' \in \{0,1\}^n,\]
+and measures each received qubit in basis $b'_i$, obtaining outcomes $a'_i$.
 
-Bob chooses $b'$ at random and measures $\ket{\psi_i}$ in basis $b_i$: $a'_i$ = measurement of $\ket{\psi_i}$ in basis $b'_i$
-If $b'_i = b_i$ then $a'_i = a_i$ else if $b'_i \neq b_i$ then $a'_i$ is uniformly random and gets discarded
+\begin{itemize}
+    \item If $b'_i = b_i (0 \to \ket{0})$, then $a'_i = a_i$ with probability 1.
+    \item If $b'_i \neq b_i$, the measurement outcome is uniformly random and uncorrelated with $a_i$.
+\end{itemize}
 
-If $b'_i = b_i$: $0 \to \ket{0}, 1 \to \ket{1}$, then in a computational basis state, $P_{\psi}(0) = |\bra{0}\ket{\psi}|^2$ and $P_{\psi}(1) = |\bra{1}\ket{\psi}|^2$
-$P_{\ket{0}}(0) = 1$ and $P_{\ket{0}}(1) = 0$, meaning $a'_i = 0$
+For example, if Alice sends $\ket{0}$ and Bob measures in the computational basis,
+\[P_{\ket{0}}(0) = |\langle 0 \mid 0 \rangle|^2 = 1, \qquad P_{\ket{0}}(1) = 0,\]
+and therefore Bob obtains the correct bit with probability $1$.
 
-if $b'_i \neq b_i$, then $a_i = 0$
-$a_i = 0, b_i = 1 \to \ket{\psi_i} = \ket{+}$
-$P_{\ket{+}}(0) = \frac{1}{2} and P_{\ket{+}}(1) = \frac{1}{2}$
+\noindent However, if Alice sends $\ket{+}$ but Bob measures in the computational basis,
+\[P_{\ket{+}}(0) = |\langle 0 \mid + \rangle|^2 = \frac{1}{2}, \qquad P_{\ket{+}}(1) = \frac{1}{2},\]
+Bob may only obtain the correct bit with probability $\frac{1}{2}$.
 
-Alice and Bob compare $b$ and $b'$ and discard $a_i$ for all $i$ where $b_i \neq b'_i$, where for the remaining $a_i = a'_i$
+\paragraph{Sifting}
+Alice and Bob publically compare the basis strings $b$ and $b'$ over the classical channel and discard all indices where $b_i \neq b'_i$.
+The remaining bits form the sifted key, for which ideally (in the absence of noise and eavesdropping)
+\[a_i = a'_i\]
 
-No cloning theorem prevents Eve from learning the quantum states Alice send Bob
+\paragraph{Example}
+The two tables below illustrate one run of the BB84 protocol.
+Alice chooses random bits $a$ and random bases $b$ to prepare the quantum state $\psi$.
+Bob independently chooses random measurement bases $b'$ and obtains outcomes $a'$.
 
-\section{Third Lecture}
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|*{6}{c}|}
+        \hline
+        \textbf{a} & 0 & 1 & 1 & 1 & 0 & 1 \\
+        \hline
+        \textbf{b} & 1 & 0 & 1 & 1 & 0 & 1 \\
+        \hline
+        $\boldsymbol{\psi}$ & $\ket{+}$ & $\ket{1}$ & $\ket{-}$ & $\ket{-}$ & $\ket{0}$ & $\ket{-}$ \\
+        \hline
+    \end{tabular}
+    \caption{Alice's side}
+\end{table}
+
+\clearpage
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|*{6}{c}|}
+        \hline
+        \textbf{b'} & 1 & 0 & 0 & 0 & 1 & 1 \\
+        \hline
+        \textbf{a'} & 0 & 1 & 1 & 0 & 1 & 1 \\
+        \hline
+        \textbf{Basis Match} & Yes & Yes & No & No & No & Yes \\
+        \hline
+        \textbf{Sifted Key} & 0 & 1 & - & - & - & 1 \\
+        \hline
+    \end{tabular}
+    \caption{Bob's side}
+\end{table}
+
+\noindent In this example, the sifted key is 011.
+
+\paragraph{Security Principle}
+The security of QKD comes from fundamental quantum properties:
+\begin{itemize}
+    \item \textbf{Measurement Disturbs the State:} Any attempt by Eve to measure the quantum states introduces detectable errors.
+    \item \textbf{No-Cloning Theorem:} Unknown quantum states cannot be copied, preventing Eve from perfectly duplicating transmitted qubits.
+\end{itemize}
+
+\newpage\section{Third Lecture}
 
 \end{document}
