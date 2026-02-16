@@ -279,5 +279,101 @@ The security of QKD comes from fundamental quantum properties:
 \end{itemize}
 
 \newpage\section{Third Lecture}
+\subsection{Recap: Quantum Systems}
+Quantum systems $\leftrightarrow$ complex Hilbert space
+e.g. polarization of a photon spin of electron $\leftrightarrow \mathbb{C}^2$
+
+dimension of a vector space V
+\begin{itemize}
+    \item Minimum cardinality of a spanning set
+    \item maximal cardinality of a linearly independent set of vectors
+    \item cardinality of any basis of $V$
+\end{itemize}
+
+LSV is called linearly independent if $\lambda_i v_i, \dots, \lambda_n v_n = 0 \Rightarrow \lambda_1 = \dots = \lambda_n = 0$
+
+
+\subsection{Quantum Mechanics}
+Quantum mechanical experiments can be categorized into 3 parts:
+\begin{itemize}
+    \item State preparation: $\ket{\psi} \in \mathcal{H}$ for closed systems and $\rho \in B(\mathcal{H})$ in open/mixed systems
+    \item Evolution: $U \in U(\mathcal{H}), U^{\dagger}U = \mathbb{I}$ and quantum channel for open/mixed systems
+    \item Measurement: $M_X \in B(\mathcal{H}), \sum_X M^{\dagger}_X M_X = \mathbb{I}$
+\end{itemize}
+
+\paragraph{Density Matrix}
+$\rho \in B(\mathcal{H})$ such that
+\begin{itemize}
+    \item $tr(\rho) = 1$
+    \item $\rho^{\dagger} = \rho$ Hermitian
+    \item Positive semi-definite ($\rho \geq 0$) for all $v\in \mathcal{H}, \bra{v}0\ket{v} \geq 0$
+\end{itemize}
+
+Example: Pure states $\rho = \ket{\psi}\bra{\psi}$ such as $\rho = \ket{0}\bra{0}$
+$\rho(\ket{\psi}) = \ket{\psi} \langle\psi\mid\varphi\rangle = \langle\psi\mid\varphi\rangle \ket{\psi}$
+
+Pauli matrices X, Y, and Z
+$tr(-) = 0 \Rightarrow$ not a density Matrix
+$Z = \begin{pmatrix}
+    1 & 0 \\
+    0 & -1
+\end{pmatrix}$
+
+If $\{P_i\}$ probabilities $p_i \geq 0, \sum_{p_i} = 1$
+Ensemble of quantum states $\{\phi_i\}, \phi_i \in \mathcal{H}$
+
+$\rho = \sum_i p_i \ket{\psi_i}\bra{\psi_i}$ is a density matrix.
+"The system is in the state $\phi_i$ with probability $p_i$"
+
+Example: $\frac{1}{2}\ket{0}, \frac{1}{2}\ket{1}$
+\[\frac{1}{2}\ket{0}\bra{0} + \frac{1}{2}\ket{1}\bra{1} = \frac{1}{2}\] fully mixed state
+
+If $\rho$ is a density matrix, then $\rho = \sum_i \lambda_i \ket{i}\bra{i}$, $\ket{i}$ orthonormal basis of $\mathcal{H}$,
+because $\rho \geq 0 \Rightarrow \lambda_i \geq 0$
+$tr(\rho) = 1 \Rightarrow \sum \lambda_i = 1$
+
+$\rho$ describes the ensemble $\{\lambda_i, \ket{i}\}$
+
+\[\rho = \frac{1}{2}(\mathbb{I} + r_xX + r_yY + r_zZ)\] for $r=(r_x, r_y, r_z)$ inside ball (bloch vector) $||r|| \leq 1$
+
+$\rho$ is pure $\Leftrightarrow tr \rho^2 = \frac{1}{2}(1+|r|^2) = 1 \Leftrightarrow |r|^2 = 1 \Leftrightarrow \rho^2 = \rho$
+
+\subsection{Quantum Channels Evolution}
+Pure state $\ket{\psi} \mapsto U\ket{\psi}$
+$\rho = \ket{\psi}\bra{\psi} \mapsto U\ket{\psi}\bra{\psi}U^{\dagger} = U\rho U^{\dagger}$
+Sends density matrices to density matrices.
+Remains true if consider $\varepsilon(\rho) \otimes i_c$ ???
+
+\paragraph{Definition}
+Quantum channel: $\mathcal{H}_A \to \mathcal{H}_B$ is a map $\varepsilon: B(\mathcal{H}_A) \to B(\mathcal{H})_B$ such that for all Hilbert spaces $\mathcal{H}_by$ $\varepsilon \otimes id_{B(\mathcal{H}_{by})}, B(\mathcal{H}_A \otimes \mathcal{H}_{by}) \to B(\mathcal{H}_A \otimes \mathcal{H}_{by})$ takes density matrices to density matrices.
+
+\paragraph{Theorem}
+$\varepsilon: B(\mathcal{H}_A) \to B(\mathcal{H}_B)$ defines quantum channel if and only if $\varepsilon$ is:
+\begin{itemize}
+    \item Trace preserving
+    \item Linear
+    \item Completely positive
+\end{itemize}
+
+\newpage\section{Fourth Lecture}
+
+\newpage\section{Fifth Lecture}
+\subsection{Classical and Quantum Information}
+Discrete Random Variable $X$: $X$ assigns probability $p_X(x)$ to every $X\in\mathcal{X}, p_X(x) \geq 0, \sum p_X(x) = 1$
+
+Quantum information modelled by density matrices.
+In particular, for every set of measurement operators $M_i\in B(\mathcal{H})$, $\sum M_i^{\dagger}M_I = \mathbb{I}_{\mathcal{H}}$ we get a probability distribution on $\mathbb{I}$ finite set.
+$p_{\rho}(i) = tr(M_i\rho M_i^{\dagger})$
+$p_{\ket{\psi}}(i) = \bra{\psi}M_i^{\dagger}M_i\ket{\psi} = tr(M_i\ket{\psi}\bra{\psi}M_i^{\dagger})$
+
+Example: $\ket{\psi} = \ket{0}, \rho = \ket{0}\bra{0}$
+$M_0 = \ket{0}\bra{0}, M_1 = \ket{1}\bra{1}$ $p_{\ket{0}}(0) = 1, p_{\ket{0}}(1) = 0$
+$M_+ = \ket{+}\bra{+}, M_- = \ket{-}\bra{-}$ $p_{\ket{0}}(+) = \frac{1}{2}, p_{\ket{0}}(-) = \frac{1}{2}$
+
+How do we measure the information content in classical and quantum setting?
+e.g. $X$ random variable $p_X(x) = 1, p_X(y) = 0, y\neq x$ no information gained/uncertainty
+Entropy: $H(X) = -\sum_{x\in\mathcal{X}} p_X(x) \log p_X(x)$ classical/Shannon
+$H(A)\rho = -tr(\rho_A\log\rho_A) = \sum_i -\lambda_i\log\lambda-i, \lambda_i EV ot \rho$ quantum/von Neumann Entropy
+
 
 \end{document}
